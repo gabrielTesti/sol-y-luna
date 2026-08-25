@@ -1,0 +1,263 @@
+/**
+ * responsive.css — Media queries para Sol & Luna
+ * Mobile-first: estilos base → tablet → desktop
+ * 
+ * Breakpoints:
+ *   sm: 480px  — móvil grande
+ *   md: 768px  — tablet
+ *   lg: 1024px — desktop
+ *   xl: 1200px — desktop grande
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TABLET (max 1024px)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+
+  /* Pasos de "Cómo comprar" en 2 columnas */
+  .steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Ocultar conector entre pasos */
+  .step-card::after {
+    display: none;
+  }
+
+  /* Secciones de dos columnas → una columna */
+  .custom-section__inner,
+  .about-inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+
+  /* Imágenes al 60% de ancho centradas */
+  .custom-section__image,
+  .about-image {
+    max-width: 500px;
+    margin-inline: auto;
+    aspect-ratio: 16 / 9;
+    order: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE (max 768px)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ── Header ─────────────────────────────────────────────────────────────── */
+
+  /* Mostrar hamburguesa */
+  .menu-toggle {
+    display: flex;
+  }
+
+  /* Ocultar nav y moverla fuera de pantalla */
+  .site-nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 85vw);
+    background-color: var(--color-bg);
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: calc(var(--header-height) + var(--space-8)) var(--space-8) var(--space-8);
+    gap: 0;
+    transform: translateX(100%);
+    transition: transform var(--transition-slow);
+    box-shadow: var(--shadow-xl);
+    z-index: 495;
+    overflow-y: auto;
+  }
+
+  .site-nav.is-open {
+    transform: translateX(0);
+  }
+
+  .nav-overlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  .nav-overlay.is-visible {
+    pointer-events: all;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .nav-list li {
+    width: 100%;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-link {
+    display: block;
+    padding: var(--space-4) 0;
+    font-size: var(--text-base);
+    border-bottom: none;
+    color: var(--color-text) !important;
+  }
+
+  .nav-link:hover {
+    color: var(--color-primary) !important;
+  }
+
+  /* ── Hero ───────────────────────────────────────────────────────────────── */
+
+  .hero-content {
+    padding-block: var(--space-16);
+    padding-inline: var(--space-4);
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn {
+    justify-content: center;
+  }
+
+  /* ── Galería ────────────────────────────────────────────────────────────── */
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+
+  /* ── Secciones ──────────────────────────────────────────────────────────── */
+
+  .section {
+    padding-block: var(--space-12);
+  }
+
+  /* Lista de personalizados en una columna */
+  .custom-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Pasos en 1 columna */
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  /* ── Carrito ────────────────────────────────────────────────────────────── */
+
+  .cart-drawer {
+    width: 100vw;
+    border-radius: 0;
+  }
+
+  .cart-header {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .cart-body {
+    padding-inline: var(--space-4);
+  }
+
+  .cart-footer {
+    padding: var(--space-4) var(--space-4) var(--space-6);
+    /* Padding extra para el área segura en iOS */
+    padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* ── Footer ─────────────────────────────────────────────────────────────── */
+
+  .footer-inner {
+    flex-direction: column;
+    gap: var(--space-8);
+    text-align: center;
+  }
+
+  .footer-nav ul,
+  .footer-social {
+    align-items: center;
+  }
+
+  .footer-social-link {
+    justify-content: center;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE PEQUEÑO (max 480px)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-filters {
+    gap: var(--space-1);
+  }
+
+  .filter-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .hero-pretitle {
+    font-size: 10px;
+  }
+
+  .cart-item {
+    grid-template-columns: 56px 1fr auto;
+    gap: var(--space-2);
+  }
+
+  .cart-item__image {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PREFERENCIAS DE ACCESIBILIDAD
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Reducir animaciones para usuarios que lo prefieren */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hero-bg img {
+    transform: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PRINT
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+  .site-header,
+  .cart-drawer,
+  .cart-overlay,
+  .hero-scroll,
+  .btn-whatsapp,
+  .category-filters {
+    display: none !important;
+  }
+}
