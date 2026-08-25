@@ -16,24 +16,33 @@ require_once __DIR__ . '/../config.php';
   <title><?= META_TITLE ?></title>
   
   <!-- Favicon -->
-  <!-- <link rel="icon" type="image/png" href="/sol-y-luna/assets/images/favicon.png?v=4"> -->
-   <link rel="icon" href="http://localhost/sol-y-luna/assets/images/favicon.png?v=6">
+  <link rel="icon" href="http://localhost/sol-y-luna/assets/images/favicon.png?v=6">
+
   <meta name="description" content="<?= META_DESCRIPTION ?>">
-  <meta name="keywords"    content="<?= META_KEYWORDS ?>">
-  <meta name="author"      content="<?= SITE_NAME ?>">
+  <meta name="keywords" content="<?= META_KEYWORDS ?>">
+  <meta name="author" content="<?= SITE_NAME ?>">
+
+  <!-- Precarga de la primera imagen del slider -->
+  <link
+    rel="preload"
+    as="image"
+    href="assets/images/custom/custom-1.jpg"
+  >
 
   <!-- Open Graph / Redes sociales -->
-  <meta property="og:type"        content="website">
-  <meta property="og:title"       content="<?= META_TITLE ?>">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="<?= META_TITLE ?>">
   <meta property="og:description" content="<?= META_DESCRIPTION ?>">
-  <meta property="og:image"       content="<?= META_OG_IMAGE ?>">
-
-  
+  <meta property="og:image" content="<?= META_OG_IMAGE ?>">
 
   <!-- Google Fonts: Cormorant Garamond + Jost -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
   <!-- CSS -->
   <link rel="stylesheet" href="assets/css/variables.css">
@@ -43,9 +52,9 @@ require_once __DIR__ . '/../config.php';
   <link rel="stylesheet" href="assets/css/gallery.css">
   <link rel="stylesheet" href="assets/css/cart.css">
   <link rel="stylesheet" href="assets/css/sections.css">
+  <link rel="stylesheet" href="assets/css/slider.css">
   <link rel="stylesheet" href="assets/css/footer.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
-  
 </head>
 <body>
 
