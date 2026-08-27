@@ -16,7 +16,7 @@ require_once __DIR__ . '/../config.php';
   <title><?= META_TITLE ?></title>
   
   <!-- Favicon -->
-  <link rel="icon" href="http://localhost/sol-y-luna/assets/images/favicon.png?v=6">
+  <link rel="icon" href="<?= asset_url('assets/images/favicon.png') ?>">
 
   <meta name="description" content="<?= META_DESCRIPTION ?>">
   <meta name="keywords" content="<?= META_KEYWORDS ?>">
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../config.php';
   <link
     rel="preload"
     as="image"
-    href="assets/images/custom/custom-1.jpg"
+    href="assets/images/llaveroresina.jpg"
   >
 
   <!-- Open Graph / Redes sociales -->
@@ -45,16 +45,9 @@ require_once __DIR__ . '/../config.php';
   >
 
   <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/variables.css">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/header.css">
-  <link rel="stylesheet" href="assets/css/hero.css">
-  <link rel="stylesheet" href="assets/css/gallery.css">
-  <link rel="stylesheet" href="assets/css/cart.css">
-  <link rel="stylesheet" href="assets/css/sections.css">
-  <link rel="stylesheet" href="assets/css/slider.css">
-  <link rel="stylesheet" href="assets/css/footer.css">
-  <link rel="stylesheet" href="assets/css/responsive.css">
+  <?php foreach (['variables', 'main', 'header', 'hero', 'gallery', 'cart', 'sections', 'slider', 'footer', 'responsive'] as $stylesheet): ?>
+    <link rel="stylesheet" href="<?= asset_url('assets/css/' . $stylesheet . '.css') ?>">
+  <?php endforeach; ?>
 </head>
 <body>
 

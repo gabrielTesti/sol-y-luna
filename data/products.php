@@ -44,7 +44,8 @@ $products = [
         'images'        => ['placeholder-vela-personalizada.jpg'],
         'is_featured'   => false,
         'is_available'  => true,
-        'allows_cart'   => true,  // puede ir al carrito con "precio a consultar"
+        'is_custom'     => true,
+        'allows_cart'   => false, // Personalización a presupuestar por WhatsApp
     ],
 
     // ── RESINA ───────────────────────────────────────────────────────────────
@@ -75,7 +76,8 @@ $products = [
         'images'        => ['placeholder-cuadro-resina.jpg'],
         'is_featured'   => false,
         'is_available'  => true,
-        'allows_cart'   => true,
+        'is_custom'     => true,
+        'allows_cart'   => false,
     ],
 
     // ── SUBLIMACIÓN ──────────────────────────────────────────────────────────
@@ -127,6 +129,7 @@ $products = [
         'images'        => ['placeholder-souvenir.jpg'],
         'is_featured'   => true,
         'is_available'  => true,
+        'is_custom'     => true,
         'allows_cart'   => false, // Solo consulta: pedido personalizado por cantidad
     ],
 
@@ -161,7 +164,8 @@ $products = [
         'images'        => ['placeholder-maceta.jpg'],
         'is_featured'   => false,
         'is_available'  => true,
-        'allows_cart'   => true,
+        'is_custom'     => true,
+        'allows_cart'   => false,
     ],
 
 ];

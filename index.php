@@ -80,7 +80,7 @@ include __DIR__ . '/includes/header.php';
 
     <!-- Filtros de categoría -->
     <div class="category-filters fade-up delay-1" role="group" aria-label="Filtrar por categoría">
-      <?php foreach ($categories as $cat): ?>
+      <?php foreach ($categories as $cat): if (!$cat['is_active']) continue; ?>
         <button class="filter-btn <?= $cat['slug'] === 'todos' ? 'active' : '' ?>"
           data-category="<?= htmlspecialchars($cat['slug']) ?>"
           aria-pressed="<?= $cat['slug'] === 'todos' ? 'true' : 'false' ?>">
@@ -94,18 +94,23 @@ include __DIR__ . '/includes/header.php';
 
       <?php foreach ($products as $i => $p):
 
-        $hasPrice    = $p['price'] !== null;
-        $allowsCart  = $p['allows_cart'];
+        if (!$p['is_available']) continue;
+
+        $isCustom    = $p['is_custom'] ?? false;
+        $hasPrice    = !$isCustom && $p['price'] !== null;
+        $allowsCart  = !$isCustom && $p['allows_cart'];
         $priceText   = $hasPrice ? format_price($p['price']) : 'Consultar precio';
-        $imageSrc    = $p['images'][0] ?? null;
-        $consultUrl  = whatsapp_product_link($p['name']);
+        $imageSrc    = product_image($p['images'][0] ?? null);
+        $consultUrl  = $isCustom ? whatsapp_custom_link($p['name']) : whatsapp_product_link($p['name']);
         $delay       = min($i, 4); // Delay máximo 4 para no acumular demasiado
 
       ?>
         <article class="product-card fade-up delay-<?= $delay ?>"
           data-category="<?= htmlspecialchars($p['category_slug']) ?>"
           data-product-id="<?= (int)$p['id'] ?>"
-          data-price="<?= $hasPrice ? (int)$p['price'] : 'null' ?>"
+          data-price="<?= $hasPrice ? htmlspecialchars((string)$p['price']) : 'null' ?>"
+          data-is-custom="<?= $isCustom ? 'true' : 'false' ?>"
+          data-custom-url="<?= htmlspecialchars(whatsapp_custom_link($p['name'])) ?>"
           data-image="<?= htmlspecialchars($imageSrc ?? '') ?>"
           data-allows-cart="<?= $allowsCart ? 'true' : 'false' ?>">
 
@@ -147,11 +152,11 @@ include __DIR__ . '/includes/header.php';
             <!-- Variantes -->
             <?php if ($p['has_variants'] && !empty($p['variants'])): ?>
               <div class="product-card__variants">
-                <?php foreach ($p['variants'] as $variant): ?>
-                  <label for="variant-<?= $p['id'] ?>-<?= strtolower($variant['name']) ?>">
+                <?php foreach ($p['variants'] as $variantIndex => $variant): ?>
+                  <label for="variant-<?= (int)$p['id'] ?>-<?= $variantIndex ?>">
                     <?= htmlspecialchars($variant['name']) ?>
                   </label>
-                  <select id="variant-<?= $p['id'] ?>-<?= strtolower($variant['name']) ?>"
+                  <select id="variant-<?= (int)$p['id'] ?>-<?= $variantIndex ?>"
                     name="variant-<?= $p['id'] ?>">
                     <?php foreach ($variant['options'] as $opt): ?>
                       <option value="<?= htmlspecialchars($opt) ?>"><?= htmlspecialchars($opt) ?></option>
@@ -189,10 +194,10 @@ include __DIR__ . '/includes/header.php';
                 </button>
               <?php else: ?>
                 <!-- Pedido personalizado: solo consulta -->
-                <button class="btn btn-primary" data-wa="custom"
-                  aria-label="Hacer pedido personalizado">
+                <a class="btn btn-primary" href="<?= htmlspecialchars(whatsapp_custom_link($p['name'])) ?>"
+                  target="_blank" rel="noopener noreferrer" aria-label="Hacer pedido personalizado de <?= htmlspecialchars($p['name']) ?>">
                   Pedir especial
-                </button>
+                </a>
               <?php endif; ?>
 
             </div>
@@ -402,8 +407,8 @@ include __DIR__ . '/includes/header.php';
       <div class="about-image fade-in">
         <img
           src="assets/images/favicon.png"
-          alt="Logo de Sol & Luna
-    class=" about-image__logo"
+          alt="Logo de Sol & Luna"
+          class="about-image__logo"
           loading="lazy">
       </div>
 

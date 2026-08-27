@@ -195,20 +195,18 @@ require_once __DIR__ . '/../config.php';
 <!-- ─── SCRIPTS ──────────────────────────────────────────────────────────────── -->
 <!-- Datos del sitio para JavaScript (inyectados desde PHP) -->
 <script>
-  window.SOL_LUNA_CONFIG = {
-    whatsappNumber: '<?= WHATSAPP_NUMBER ?>',
-    siteName:       '<?= SITE_NAME ?>',
-    instagramUrl:   '<?= INSTAGRAM_URL ?>',
-    instagramHandle:'<?= INSTAGRAM_HANDLE ?>',
-  };
+  window.SOL_LUNA_CONFIG = <?= json_encode([
+    'whatsappNumber' => WHATSAPP_NUMBER,
+    'siteName' => SITE_NAME,
+    'instagramUrl' => INSTAGRAM_URL,
+    'instagramHandle' => INSTAGRAM_HANDLE,
+    'customOrderMessage' => WA_CUSTOM_ORDER_MSG,
+  ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>;
 </script>
 
-<script src="assets/js/cart.js"></script>
-<script src="assets/js/whatsapp.js"></script>
-<script src="assets/js/gallery.js"></script>
-<script src="assets/js/animations.js"></script>
-<script src="assets/js/main.js"></script>
-<script src="assets/js/slider.js"></script>
+<?php foreach (['cart', 'whatsapp', 'gallery', 'animations', 'main', 'slider'] as $script): ?>
+  <script src="<?= asset_url('assets/js/' . $script . '.js') ?>"></script>
+<?php endforeach; ?>
 
 
 </body>

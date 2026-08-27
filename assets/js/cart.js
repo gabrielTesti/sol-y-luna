@@ -31,10 +31,38 @@ const Cart = (() => {
   function _load() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      items = saved ? JSON.parse(saved) : [];
+      const parsed = saved ? JSON.parse(saved) : [];
+      items = Array.isArray(parsed) ? parsed.map(_restoreItem).filter(Boolean) : [];
     } catch {
       items = [];
     }
+  }
+
+  // Restaurar solo productos vigentes y cantidades válidas; actualizar precios y fotos.
+  function _restoreItem(item) {
+    if (!item || !Number.isInteger(item.productId) ||
+        !Number.isSafeInteger(item.qty) || item.qty < 1 ||
+        typeof item.variant !== 'string') return null;
+    const card = document.querySelector(`[data-product-id="${item.productId}"]`);
+    if (!card || card.dataset.allowsCart !== 'true') return null;
+    const selects = [...card.querySelectorAll('.product-card__variants select')];
+    const variants = item.variant ? item.variant.split(' / ') : [];
+    if (variants.length !== selects.length || selects.some((select, i) =>
+      ![...select.options].some(option => option.value === variants[i])) ||
+      variants.some(value => value.toLowerCase() === 'personalizado')) return null;
+    const price = card.dataset.price === 'null' ? null : Number(card.dataset.price);
+    if (price !== null && (!Number.isFinite(price) || price < 0)) return null;
+    return {
+      cartItemId: _buildId(item.productId, item.variant),
+      productId: item.productId,
+      name: card.querySelector('.product-card__name').textContent.trim(),
+      category: card.dataset.category,
+      price,
+      image: card.dataset.image || null,
+      variant: item.variant,
+      qty: item.qty,
+      allowsCart: true,
+    };
   }
 
   function _save() {
@@ -54,10 +82,15 @@ const Cart = (() => {
    * @param {number} qty      - Cantidad inicial (default 1)
    */
   function add(product, variant = '', qty = 1) {
+    if (!product || product.allows_cart !== true ||
+        !Number.isInteger(product.id) || !Number.isSafeInteger(qty) || qty < 1 ||
+        typeof variant !== 'string' || variant.split(' / ').some(v => v.toLowerCase() === 'personalizado') ||
+        (product.price !== null && (!Number.isFinite(product.price) || product.price < 0))) return false;
     const cartItemId = _buildId(product.id, variant);
     const existing   = items.find(i => i.cartItemId === cartItemId);
 
     if (existing) {
+      if (!Number.isSafeInteger(existing.qty + qty)) return false;
       existing.qty += qty;
     } else {
       items.push({
@@ -83,6 +116,7 @@ const Cart = (() => {
       btn.classList.add('adding');
       btn.addEventListener('animationend', () => btn.classList.remove('adding'), { once: true });
     }
+    return true;
   }
 
   /**
@@ -92,7 +126,7 @@ const Cart = (() => {
    */
   function updateQty(cartItemId, delta) {
     const item = items.find(i => i.cartItemId === cartItemId);
-    if (!item) return;
+    if (!item || !Number.isSafeInteger(delta) || !Number.isSafeInteger(item.qty + delta)) return;
 
     item.qty = Math.max(1, item.qty + delta);
     _save();
@@ -188,11 +222,17 @@ const Cart = (() => {
         const id    = btn.dataset.id;
         const delta = parseInt(btn.dataset.delta, 10);
         updateQty(id, delta);
+        // El render reemplaza el botón; devolver el foco al control equivalente.
+        [...container.querySelectorAll('.cart-qty-btn')]
+          .find(control => control.dataset.id === id && Number(control.dataset.delta) === delta)?.focus();
       });
     });
 
     container.querySelectorAll('.cart-item__remove').forEach(btn => {
-      btn.addEventListener('click', () => remove(btn.dataset.id));
+      btn.addEventListener('click', () => {
+        remove(btn.dataset.id);
+        document.getElementById('cart-close')?.focus();
+      });
     });
   }
 
@@ -202,11 +242,11 @@ const Cart = (() => {
       : `<span class="cart-item__price cart-item__price--consult">Precio a consultar</span>`;
 
     const variantHTML = item.variant
-      ? `<span class="cart-item__variant">${item.variant}</span>`
+      ? `<span class="cart-item__variant">${_esc(item.variant)}</span>`
       : '';
 
     const imgHTML = item.image
-      ? `<img class="cart-item__image" src="assets/images/products/${item.image}" alt="${_esc(item.name)}" loading="lazy">`
+      ? `<img class="cart-item__image" src="assets/images/products/${_esc(item.image)}" alt="${_esc(item.name)}" loading="lazy">`
       : `<div class="cart-item__image cart-item__image--placeholder" aria-hidden="true">🛍️</div>`;
 
     return `
@@ -271,13 +311,18 @@ const Cart = (() => {
     const overlay = document.getElementById('cart-overlay');
     const cartBtn = document.getElementById('cart-btn');
 
+    const menuToggle = document.getElementById('menu-toggle');
+    if (menuToggle?.getAttribute('aria-expanded') === 'true') menuToggle.click();
+
+    drawer?.removeAttribute('inert');
+    drawer?.setAttribute('aria-hidden', 'false');
     drawer?.classList.add('is-open');
     overlay?.classList.add('is-visible');
     cartBtn?.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
 
     // Focus en el botón de cierre para accesibilidad
-    setTimeout(() => document.getElementById('cart-close')?.focus(), 50);
+    document.getElementById('cart-close')?.focus();
   }
 
   function close() {
@@ -290,17 +335,33 @@ const Cart = (() => {
     cartBtn?.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
     cartBtn?.focus();
+    drawer?.setAttribute('inert', '');
+    drawer?.setAttribute('aria-hidden', 'true');
   }
 
   function _bindDrawer() {
     document.getElementById('cart-btn')?.addEventListener('click', open);
     document.getElementById('cart-close')?.addEventListener('click', close);
     document.getElementById('cart-overlay')?.addEventListener('click', close);
+    document.getElementById('cart-go-gallery')?.addEventListener('click', close);
 
     // Cerrar con Escape
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && document.getElementById('cart-drawer')?.classList.contains('is-open')) {
+      const drawer = document.getElementById('cart-drawer');
+      if (!drawer?.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
         close();
+      } else if (e.key === 'Tab') {
+        const controls = [...drawer.querySelectorAll('a[href], button:not([disabled])')]
+          .filter(control => control.getClientRects().length > 0);
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        const outside = !drawer.contains(document.activeElement);
+        if (outside || (e.shiftKey && document.activeElement === first) ||
+            (!e.shiftKey && document.activeElement === last)) {
+          e.preventDefault();
+          (e.shiftKey ? last : first)?.focus();
+        }
       }
     });
 

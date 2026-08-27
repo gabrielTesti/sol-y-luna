@@ -26,8 +26,10 @@ const Gallery = (() => {
         currentFilter = category;
 
         // Actualizar estado activo
-        filterBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        filterBtns.forEach(b => {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-pressed', String(b === btn));
+        });
 
         // Filtrar tarjetas
         _filterCards(category);
@@ -40,7 +42,10 @@ const Gallery = (() => {
 
     cards.forEach((card, i) => {
       const cardCategory = card.dataset.category;
-      const shouldShow   = category === 'todos' || cardCategory === category;
+      const hasCustomOption = [...card.querySelectorAll('option')]
+        .some(option => option.value.toLowerCase() === 'personalizado');
+      const shouldShow = category === 'todos' || cardCategory === category ||
+        (category === 'personalizados' && (card.dataset.isCustom === 'true' || hasCustomOption));
 
       if (shouldShow) {
         card.classList.remove('is-hidden');
@@ -62,6 +67,12 @@ const Gallery = (() => {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
 
+    grid.querySelectorAll('.product-card').forEach(card => _syncVariantActions(card));
+    grid.addEventListener('change', e => {
+      const card = e.target.closest('.product-card');
+      if (card) _syncVariantActions(card);
+    });
+
     grid.addEventListener('click', e => {
 
       // Botón "Agregar al carrito"
@@ -71,12 +82,7 @@ const Gallery = (() => {
         return;
       }
 
-      // Botón "Consultar por WhatsApp"
-      const consultBtn = e.target.closest('.btn-consult');
-      if (consultBtn) {
-        _handleConsult(consultBtn);
-        return;
-      }
+      // Los enlaces Consultar navegan normalmente: una sola apertura de WhatsApp.
 
     });
   }
@@ -85,15 +91,16 @@ const Gallery = (() => {
     const card = btn.closest('.product-card');
     if (!card) return;
 
-    const productId = card.dataset.productId;
     const product   = _getProductData(card);
 
-    // Obtener variante seleccionada si existe
-    const variantSelect = card.querySelector('.product-card__variants select');
-    const variant = variantSelect ? variantSelect.value : '';
+    const variant = _selectedVariants(card).join(' / ');
+    if (_isCustomSelection(card)) {
+      WhatsApp.customOrder(product.name);
+      return;
+    }
 
     if (typeof Cart !== 'undefined') {
-      Cart.add(product, variant, 1);
+      if (!Cart.add(product, variant, 1)) return;
 
       // Feedback en el botón
       const originalText = btn.textContent;
@@ -103,19 +110,39 @@ const Gallery = (() => {
       setTimeout(() => {
         btn.textContent = originalText;
         btn.disabled = false;
+        _syncVariantActions(card);
       }, 1500);
     }
   }
 
-  function _handleConsult(btn) {
-    const card = btn.closest('.product-card');
-    if (!card) return;
+  function _selectedVariants(card) {
+    return [...card.querySelectorAll('.product-card__variants select')].map(select => select.value);
+  }
 
-    const productName = card.querySelector('.product-card__name')?.textContent || 'este producto';
+  function _isCustomSelection(card) {
+    return _selectedVariants(card).some(value => value.toLowerCase() === 'personalizado');
+  }
 
-    if (typeof WhatsApp !== 'undefined') {
-      WhatsApp.consultProduct(productName.trim());
+  function _syncVariantActions(card) {
+    const custom = _isCustomSelection(card);
+    const addBtn = card.querySelector('.btn-add-cart');
+    const consult = card.querySelector('.btn-consult');
+    const name = card.querySelector('.product-card__name')?.textContent.trim() || '';
+    if (addBtn && !addBtn.disabled) {
+      addBtn.textContent = custom ? 'Consultar diseño' : 'Agregar';
+      addBtn.setAttribute('aria-label', custom ? `Consultar diseño de ${name}` : `Agregar ${name} al carrito`);
     }
+    if (consult) {
+      if (!consult.dataset.baseUrl) consult.dataset.baseUrl = consult.href;
+      const url = new URL(custom ? card.dataset.customUrl : consult.dataset.baseUrl);
+      const variants = _selectedVariants(card).join(' / ');
+      if (!custom && variants) {
+        url.searchParams.set('text', url.searchParams.get('text') + `\nVariante: ${variants}`);
+      }
+      consult.href = url.toString();
+    }
+    const price = card.querySelector('.product-card__price');
+    if (price) price.hidden = custom;
   }
 
   /**

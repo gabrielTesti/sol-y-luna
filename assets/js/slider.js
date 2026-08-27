@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'assets/images/llaveroresina.jpg',
     'assets/images/velasfloresgrandes.png',
     'assets/images/lapicerasresinajpg.jpg',
-    'assets/images/velas-aromaticas.jpg',
+    'assets/images/velaaromatica2.jpg',
     'assets/images/tazas.jpg',
     'assets/images/tazasspiderman.jpg',
     'assets/images/tudiseñoaqui.jpg',
@@ -23,11 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentIndex = 0;
   let intervalId;
   let isChanging = false;
+  const slider = imageEl.closest('.custom-slider');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function showImage(index, direction = 'next', manual = false) {
     if (isChanging) return;
 
     isChanging = true;
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
 
     const exitClass =
       direction === 'next'
@@ -40,40 +44,46 @@ document.addEventListener('DOMContentLoaded', () => {
         : 'enter-from-left';
 
     // Manual = más rápido
-    const exitDelay = manual ? 150 : 280;
-    const unlockDelay = manual ? 180 : 280;
+    const exitDelay = reducedMotion.matches ? 0 : (manual ? 150 : 280);
+    const unlockDelay = reducedMotion.matches ? 0 : (manual ? 180 : 280);
 
-    imageEl.classList.add(exitClass);
+    // Cargar antes de ocultar la foto actual. Un error no debe trabar las flechas.
+    const nextImage = new Image();
+    const cancelLoad = () => {
+      clearTimeout(loadTimeout);
+      nextImage.onload = null;
+      nextImage.onerror = null;
+      isChanging = false;
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+    };
+    const loadTimeout = setTimeout(cancelLoad, 8000);
+    nextImage.onerror = cancelLoad;
+    nextImage.onload = () => {
+      clearTimeout(loadTimeout);
+      nextImage.onload = null;
+      nextImage.onerror = null;
+      imageEl.classList.add(exitClass);
 
-    setTimeout(() => {
-      imageEl.src = images[index];
+      setTimeout(() => {
+        imageEl.src = nextImage.src;
 
-      imageEl.classList.remove(
-        'exit-left',
-        'exit-right'
-      );
-
-      imageEl.classList.add(enterClass);
-
-      const finishTransition = () => {
+        imageEl.classList.remove('exit-left', 'exit-right');
+        imageEl.classList.add(enterClass);
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             imageEl.classList.remove(enterClass);
 
             setTimeout(() => {
               isChanging = false;
+              prevBtn.disabled = false;
+              nextBtn.disabled = false;
             }, unlockDelay);
           });
         });
-      };
-
-      // Si ya estaba cargada en caché
-      if (imageEl.complete) {
-        finishTransition();
-      } else {
-        imageEl.onload = finishTransition;
-      }
-    }, exitDelay);
+      }, exitDelay);
+    };
+    nextImage.src = images[index];
   }
 
   function nextImage(manual = false) {
@@ -96,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function startAutoSlide() {
     clearInterval(intervalId);
+    if (document.hidden || reducedMotion.matches || slider.matches(':hover') ||
+        slider.contains(document.activeElement)) return;
 
     intervalId = setInterval(() => {
       nextImage(false);
@@ -116,6 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
     prevImage(true);
     resetAutoSlide();
   });
+
+  slider.addEventListener('mouseenter', () => clearInterval(intervalId));
+  slider.addEventListener('mouseleave', startAutoSlide);
+  slider.addEventListener('focusin', () => clearInterval(intervalId));
+  slider.addEventListener('focusout', () => setTimeout(startAutoSlide, 0));
+  document.addEventListener('visibilitychange', startAutoSlide);
+  reducedMotion.addEventListener('change', startAutoSlide);
 
   startAutoSlide();
 });

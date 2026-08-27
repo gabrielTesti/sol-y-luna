@@ -82,14 +82,14 @@
   box-shadow: var(--shadow-lg);
 }
 
-.custom-section__image img {
+.custom-section__image > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.6s ease;
 }
 
-.custom-section__image:hover img {
+.custom-section__image:hover > img {
   transform: scale(1.03);
 }
 

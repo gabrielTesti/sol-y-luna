@@ -105,6 +105,40 @@ Editá `data/products.php` y agregá un nuevo ítem al array `$products`:
 - **Productos**: Colocar imágenes en `assets/images/products/` y referenciar el nombre en `data/products.php`.
 - **Nosotros / Proceso**: Colocar imagen en `assets/images/about/` y descomentar la línea `<img>` en la sección "Sobre Sol & Luna".
 
+### Slider de personalizados y caché
+
+Las fotos del slider se eligen en `assets/js/slider.js` y están en `assets/images/`.
+La foto `velaaromatica2.jpg` ocupa el cuarto lugar. Este listado es independiente
+de las tarjetas del catálogo (`data/products.php`).
+
+`Untracked` significa que Git todavía no registró un archivo nuevo; no impide
+que XAMPP o el navegador lo muestren. Guardá los cambios y refrescá localhost.
+CSS y JavaScript llevan una versión calculada desde su contenido para evitar
+caché vieja. Si ya tenías la página abierta, probá una vez `Ctrl + F5`.
+
+El slider pausa el avance automático mientras tiene el mouse encima o el foco
+del teclado; las flechas siguen funcionando. También respeta movimiento reducido.
+
+### Reglas funcionales del catálogo
+
+- Pedido hecho a medida: `is_custom => true` y `allows_cart => false`.
+- Una variante llamada `Personalizado` abre consulta directa y no calcula precio.
+- El filtro Personalizados incluye pedidos a medida y productos con esa variante.
+- Las fotos inexistentes muestran el marcador visual de la categoría.
+- Productos con `is_available => false` y categorías inactivas no se muestran.
+- Al recuperar el carrito, se actualizan precios/fotos desde el catálogo y se
+  descartan productos retirados, consultas personalizadas y cantidades inválidas.
+
+### Pruebas locales (sin enviar mensajes reales)
+
+```powershell
+node --test tests/cart.test.cjs tests/slider.test.cjs
+C:\xampp\php\php.exe tests/functional.php
+```
+
+Las pruebas JavaScript usan almacenamiento simulado. Node solo se necesita para
+ejecutar estas pruebas, no para servir la V1. No publicar la carpeta `tests/`.
+
 ---
 
 ## Cambiar colores

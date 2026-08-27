@@ -14,6 +14,8 @@ require_once __DIR__ . '/../config.php';
        id="cart-drawer"
        role="dialog"
        aria-modal="true"
+       aria-hidden="true"
+       inert
        aria-label="Mi carrito de consulta">
 
   <!-- Header -->
@@ -74,8 +76,8 @@ require_once __DIR__ . '/../config.php';
     </button>
 
     <p class="cart-footer-note" style="font-size:0.75rem; color:var(--color-text-light); text-align:center; margin-top:var(--space-3); line-height:1.45;">
-      Al enviar te contactaremos para confirmar disponibilidad,<br>
-      precio final y coordinar la entrega en Santa Fe Capital.
+      Se abrirá WhatsApp con tu selección para que envíes la consulta.<br>
+      Allí confirmamos disponibilidad, precio final y entrega en Santa Fe Capital.
     </p>
 
   </div>

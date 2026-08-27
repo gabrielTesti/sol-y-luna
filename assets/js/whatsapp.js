@@ -68,7 +68,7 @@ const WhatsApp = (() => {
 
     // ─── Total ─────────────────────────────────────────────────────────────
     if (total > 0 && !hasConsultItems) {
-      msg += `💰 *Total: $${_fmt(total)}*\n\n`;
+      msg += `💰 *Total estimado: $${_fmt(total)}*\n\n`;
     } else if (total > 0 && hasConsultItems) {
       msg += `💰 *Total estimado: $${_fmt(total)}*\n`;
       msg += `_(No incluye ítems con precio a consultar)_\n\n`;
@@ -96,14 +96,9 @@ const WhatsApp = (() => {
   /**
    * Pedido personalizado — abre WhatsApp con plantilla para completar.
    */
-  function customOrder() {
-    const msg =
-      `Hola! 👋 Quería consultar por un *pedido personalizado* de Sol & Luna.\n\n` +
-      `✏️ *Producto o idea:*\n\n` +
-      `📦 *Cantidad aproximada:*\n\n` +
-      `📅 *Fecha en que lo necesito:*\n\n` +
-      `🎨 *Detalles de personalización* (colores, texto, temática, etc.):\n\n` +
-      `Quería consultar si es posible realizarlo y conocer el presupuesto. ¡Muchas gracias! 🌟`;
+  function customOrder(productName = '') {
+    let msg = window.SOL_LUNA_CONFIG.customOrderMessage;
+    if (productName) msg = msg.replace('*Producto o idea:*', `*Producto o idea:* ${productName}`);
     open(msg);
   }
 

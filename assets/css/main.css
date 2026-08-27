@@ -5,6 +5,10 @@
 
 /* ─── Reset y base ──────────────────────────────────────────────────────────── */
 
+[hidden] {
+  display: none !important;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

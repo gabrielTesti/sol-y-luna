@@ -14,7 +14,7 @@ define('SITE_DESCRIPTION', 'En Sol & Luna creamos piezas artesanales hechas con 
 
 // Número en formato internacional sin + ni espacios: 549 + código de área + número
 // Ejemplo Santa Fe: 5493424XXXXXX
-define('WHATSAPP_NUMBER',  '5493424090182'); // ← Reemplazar con el número real
+define('WHATSAPP_NUMBER',  '5493424090182');
 
 define('INSTAGRAM_HANDLE', 'sol_luna.ideas');
 define('INSTAGRAM_URL',    'https://www.instagram.com/sol_luna.ideas');
@@ -30,7 +30,7 @@ define('DELIVERY_DETAIL','Las entregas se coordinan por WhatsApp dentro de Santa
 define('META_TITLE',       'Sol & Luna | Artesanías y personalizados en Santa Fe');
 define('META_DESCRIPTION', 'Artesanías únicas hechas a mano en Santa Fe Capital. Sublimación, resina, velas, souvenirs y regalos personalizados. Consultá por tu pedido especial.');
 define('META_KEYWORDS',    'artesanías Santa Fe, personalizados Santa Fe, regalos personalizados, souvenirs, sublimación, resina, velas, productos artesanales, Santa Fe Capital');
-define('META_OG_IMAGE',    'assets/images/og-image.jpg');
+define('META_OG_IMAGE',    'assets/images/favicon.png');
 
 // ─── Mensajes de WhatsApp (plantillas PHP para enlaces estáticos) ──────────────
 
@@ -53,6 +53,18 @@ define('WA_GENERAL_MSG',
 
 // ─── Funciones helper ──────────────────────────────────────────────────────────
 
+/** Actualiza la URL cuando cambia el archivo para evitar versiones en caché. */
+function asset_url(string $path): string {
+    $file = __DIR__ . '/' . $path;
+    return is_file($file) ? $path . '?v=' . substr(sha1_file($file), 0, 12) : $path;
+}
+
+/** No generar enlaces rotos mientras se completan las fotos del catálogo. */
+function product_image(?string $filename): ?string {
+    return $filename && is_file(__DIR__ . '/assets/images/products/' . $filename)
+        ? $filename : null;
+}
+
 /**
  * Genera un enlace wa.me con mensaje pre-armado.
  */
@@ -70,8 +82,12 @@ function whatsapp_product_link(string $product_name): string {
 /**
  * Genera enlace para pedidos personalizados.
  */
-function whatsapp_custom_link(): string {
-    return whatsapp_link(WA_CUSTOM_ORDER_MSG);
+function whatsapp_custom_link(string $product_name = ''): string {
+    $message = WA_CUSTOM_ORDER_MSG;
+    if ($product_name !== '') {
+        $message = str_replace('*Producto o idea:*', '*Producto o idea:* ' . $product_name, $message);
+    }
+    return whatsapp_link($message);
 }
 
 /**
